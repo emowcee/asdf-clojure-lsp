@@ -7,7 +7,7 @@ Manage your Clojure-LSP versions using ASDF.
 ## Installation
 
 ```sh
-asdf plugin-add clojure-lsp https://github.com/yourusername/clojure-lsp-asdf-plugin.git
+asdf plugin-add clojure-lsp https://github.com/emowcee/asdf-clojure-lsp.git
 ```
 
 ## Usage
