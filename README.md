@@ -9,3 +9,11 @@ Manage your Clojure-LSP versions using ASDF.
 ```sh
 asdf plugin-add clojure-lsp https://github.com/yourusername/clojure-lsp-asdf-plugin.git
 
+## Usage
+asdf install clojure-lsp <version>
+
+## License
+
+Licensed under the
+[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
