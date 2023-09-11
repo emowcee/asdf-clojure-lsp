@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+
+fail() {
+  echo -e "\e[31mFail:\e[m $*"
+  exit 1
+}
+
+install() {
+  local install_type=$1
+  local version=$2
+  local install_path=$3
+
+  if [ "$install_type" != "version" ]; then
+    fail "asdf-clojure-lsp supports release installs only"
+  fi
+
+  case "$(uname -s)" in
+  Linux*) platform=linux ;;
+  Darwin*) platform=macos ;;
+  esac
+
+  case "$(uname -m)" in
+  aarch64) arch=aarch64 ;;
+  arm64) arch=aarch64 ;;
+  *) arch=amd64 ;;
+  esac
+
+  ext="zip"
+  util="$(which unzip) -qqo"
+
+  case "$platform-$arch" in
+  linux-amd64)
+    local filename="clojure-lsp-native-static-$platform-$arch."$ext
+    ;;
+  *)
+    local filename="clojure-lsp-native-$platform-$arch."$ext
+    ;;
+  esac
+
+  if [[ "$version" == "nightly" ]]; then
+    local download_url="https://github.com/clojure-lsp/clojure-lsp-dev-builds/releases/latest/download/$filename"
+  else
+    local download_url="https://github.com/clojure-lsp/clojure-lsp/releases/download/$version/$filename"
+  fi
+
+  local tmp_download_dir
+  tmp_download_dir=$(mktemp -d -t clojurelsp_tmp_XXXXXX)
+  local source_path="${tmp_download_dir}/${filename}"
+  local destination_path="${tmp_download_dir}/dist"
+
+  (
+    cd "$tmp_download_dir"
+    curl --silent --location --output "$source_path" -C - "$download_url" || fail "Could not download Clojure-lsp installer for $version"
+    mkdir -p "$destination_path"
+    $util "$filename"
+    rm -f "$filename"
+
+    mkdir -p "$install_path"
+    if [ -f "$install_path/clojure-lsp" ]; then
+        echo "Moving $install_path/clojure-lsp to $install_path/clojure-lsp.old"
+        mv -f "$install_path/clojure-lsp" "$install_path/clojure-lsp.old"
+    fi
+    mv -f "$tmp_download_dir/clojure-lsp" "$install_path/clojure-lsp"
+    chmod +x "$install_path/clojure-lsp"
+
+  ) || (
+    rm -rf "$install_path"
+    fail "An error occurred"
+  )
+  rm -rf "$tmp_download_dir"
+}
+
+install "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"

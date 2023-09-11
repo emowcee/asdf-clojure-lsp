@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Fetch and print all released versions of clojure-lsp
+curl -s "https://api.github.com/repos/clojure-lsp/clojure-lsp/releases" | \
+  jq -r '.[].tag_name'
